@@ -145,8 +145,6 @@ XGBoost performed the best based on ROC-AUC and provided the strongest balance b
 
 ## 7. Model Training
 
-## 7. Model Training
-
 **Tools Used:**  
 - scikit-learn → Logistic Regression, Decision Tree, Random Forest, preprocessing, and evaluation metrics  
 - xgboost → XGBClassifier for gradient boosting  

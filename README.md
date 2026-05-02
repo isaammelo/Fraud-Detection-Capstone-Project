@@ -188,8 +188,6 @@ The classification threshold can be adjusted to prioritize recall over precision
 
 ## 9. Model Interpretation
 
-## 9. Model Interpretation
-
 **Feature Importance:**
 
 ![Feature Importance](images/xgboost_feature_importance.png)

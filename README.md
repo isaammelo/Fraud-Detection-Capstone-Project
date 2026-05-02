@@ -232,9 +232,8 @@ XGBoost achieved the best performance, showing a strong balance between precisio
 - Compared multiple machine learning models for fraud detection  
 - Evaluated different imbalance handling techniques  
 - Applied feature engineering to improve model performance  
-- Used SHAP to interpret model predictions and understand feature impact  
+- Used SHAP to interpret model predictions and understand feature impact
 
-This project shows how combining proper preprocessing, model selection, and interpretation techniques can lead to effective fraud detection in real-world scenarios.
 ---
 
 ## 12. Future Work

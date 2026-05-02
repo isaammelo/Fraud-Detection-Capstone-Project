@@ -263,11 +263,13 @@ pip install -r requirements.txt
 - Go to: https://www.kaggle.com/competitions/ieee-fraud-detection/data
 - Download `train_transaction.csv` and `train_identity.csv`
 - Place both files inside the `data/` folder
+
 4. Run the notebook
 ```bash
 jupyter notebook notebooks/Fraud_Detection_Capstone_Project_Code.ipynb
 ```
 Run all cells from top to bottom. The notebook performs preprocessing, EDA, model training, evaluation, and saves the final model.
+
 5. Load saved model if needed
 ```python
 import joblib

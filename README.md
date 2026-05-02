@@ -1,7 +1,8 @@
-# Fraud-Detection-Project-Using-Machine-Learning
+# Fraud Detection Project - Machine-Learning Pipeline
 Machine learning project for detecting fraudulent online transactions using the IEEE-CIS Fraud Detection dataset.
 
-Isaam Melo
+Isaam Melo,  https://www.kaggle.com/competitions/ieee-fraud-detection/data
+
 ---
 
 ## 1. Business Problem / Motivation

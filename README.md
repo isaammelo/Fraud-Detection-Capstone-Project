@@ -1,5 +1,6 @@
 # Fraud-Detection-Project-Using-Machine-Learning
 Machine learning project for detecting fraudulent online transactions using the IEEE-CIS Fraud Detection dataset.
+
 Isaam Melo
 ---
 
@@ -285,6 +286,4 @@ model = joblib.load("models/xgb_fraud_model.pkl")
 ## 15. Requirements
 ```bash
 pip install -r requirements.txt
-```
-```
 ```

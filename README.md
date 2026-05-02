@@ -1,23 +1,41 @@
 # Fraud-Detection-Project-Using-Machine-Learning
 Machine learning project for detecting fraudulent online transactions using the IEEE-CIS Fraud Detection dataset.
-
+Isaam Melo
 ---
 
 ## 1. Business Problem / Motivation
 
-Credit card fraud is a serious problem in the financial industry. Large numbers of fraudulent transactions lead to financial loss and can reduce customer trust. At the same time, flagging normal transactions as fraud can frustrate users and hurt the overall experience.
+Credit card fraud is a major issue in the financial industry, leading to significant financial losses and reduced customer trust. Failing to detect fraudulent transactions can result in direct monetary loss, while incorrectly flagging legitimate transactions can negatively impact user experience.
 
-This project focuses on building a machine learning model that can classify transactions as fraud or non-fraud using both transaction and identity data.
+This project focuses on a binary classification problem: given a financial transaction and its associated identity information, predict whether the transaction is fraudulent or not.
+
+The challenge is not only to build an accurate model, but also to balance detecting fraud (high recall) while limiting false alarms, which is important for real-world applications.
 
 ---
 
 ## 2. Project Overview
 
-This project uses the IEEE-CIS Fraud Detection dataset to build a full machine learning pipeline. The process includes data cleaning, exploratory data analysis, preprocessing, model training, and evaluation.
+**Goal:**  
+Predict whether a financial transaction is fraudulent (binary classification).
 
-Several models were tested, including Logistic Regression, Decision Tree, Random Forest, and XGBoost. Imbalance handling techniques such as Random Oversampling, SMOTE, and ADASYN were also applied.
+**Approach:**  
+This project follows a full machine learning pipeline, including data cleaning, exploratory data analysis, preprocessing, model training, and evaluation. Multiple models were tested, along with imbalance handling techniques to improve fraud detection.
 
-XGBoost performed the best based on ROC-AUC and showed a strong balance between precision and recall.
+**Models Used:**  
+- Logistic Regression (baseline)  
+- Decision Tree  
+- Random Forest  
+- XGBoost  
+
+**Key Techniques:**  
+- Random Oversampling  
+- SMOTE  
+- ADASYN  
+- Feature importance analysis  
+- SHAP for model interpretation  
+
+**Best Model:**  
+XGBoost achieved the best performance based on ROC-AUC and provided a strong balance between precision and recall.
 
 ---
 
@@ -26,11 +44,11 @@ XGBoost performed the best based on ROC-AUC and showed a strong balance between 
 **Source:** IEEE-CIS Fraud Detection dataset (Kaggle)  
 https://www.kaggle.com/competitions/ieee-fraud-detection/data
 
-**Type:** Tabular transaction and identity data  
+**Type:** Tabular, anonymized financial transaction and identity data  
 
-**Size:** Around 590,000 transactions from:
-- `train_transaction.csv`
-- `train_identity.csv`
+**Size:** Approximately 590,000 transactions across two files:
+- `train_transaction.csv` → transaction-level features  
+- `train_identity.csv` → identity and device-related features  
 
 The datasets were merged using `TransactionID`.
 
@@ -38,119 +56,139 @@ The datasets were merged using `TransactionID`.
 - `isFraud` (0 = non-fraud, 1 = fraud)
 
 **Class Distribution:**
-- About 96.5% non-fraud  
-- About 3.5% fraud (high imbalance)
+- ~96.5% non-fraud  
+- ~3.5% fraud (highly imbalanced)
 
 **Key Features:**
-- Transaction amount (`TransactionAmt`)  
-- Card-related features (`card1–card6`)  
-- Address features (`addr1`, `addr2`)  
-- Behavioral features (`C1–C14`)  
-- Time-related features (`D1–D15`)  
-- Engineered features (`V1–V339`)  
+- `TransactionAmt` → transaction amount  
+- `TransactionDT` → time-related feature  
+- `card1–card6` → anonymized card information  
+- `addr1, addr2` → billing location  
+- `C1–C14` → behavioral count features  
+- `D1–D15` → time-based features  
+- `V1–V339` → engineered features capturing risk patterns  
 
-**Note:** Dataset is not included due to Kaggle rules. Download it and place it in the `data/` folder.
+**Note:** The dataset is not included in this repository due to Kaggle restrictions. Download it from the link above and place it in the `data/` folder.
 
 ---
 
 ## 4. Data Preprocessing
 
-- Merged transaction and identity datasets using `TransactionID`  
-- Dropped columns with more than 70% missing values  
-- Filled missing numeric values with median  
-- Filled categorical values with mode  
-- Applied one-hot encoding for categorical variables  
-- Split data into 80/20 train and test sets  
-- Applied scaling for models like Logistic Regression  
-- Tree-based models were trained without scaling  
+**Merging Datasets**  
+The transaction and identity datasets were merged using `TransactionID`, combining transaction-level information with identity and device-related features.
+
+**Handling Missing Values**  
+Columns with more than 70% missing values were removed since they contained very little useful information. For the remaining data:
+- Numeric features were filled using the median  
+- Categorical features were filled using the mode  
+
+**Feature Engineering**  
+Additional features were created to improve model performance and capture fraud-related patterns:
+- `log_TransactionAmt` to reduce skewness in transaction amounts  
+- `email_domain_match` to compare purchaser and recipient email domains  
+- `missing_count` to measure how much data is missing per transaction  
+- Frequency encoding for high-cardinality categorical variables  
+
+**Encoding and Splitting**  
+Categorical variables were converted into numerical format so they could be used in machine learning models. The dataset was then split into training and testing sets using an 80/20 split while preserving the class distribution.
+
+**Feature Scaling**  
+Scaling was applied for models like Logistic Regression that require standardized inputs. Tree-based models such as Random Forest and XGBoost were trained without scaling.
 
 ---
 
 ## 5. Exploratory Data Analysis (EDA)
 
+Exploratory Data Analysis was performed to better understand patterns in the dataset and how they relate to fraudulent transactions.
+
 **Class Imbalance:**  
-Only about 3.5% of transactions are fraud, which makes the problem challenging.
+Only about 3.5% of transactions are fraud, which shows that the dataset is highly imbalanced. This means that accuracy alone is not a reliable metric, and special techniques are needed to detect fraud effectively.
 
 ![Class Imbalance](images/class_imbalance.png)
 
 **Transaction Amount Distribution:**  
-Most transactions are small, with a few large outliers.
+Most transactions are small, with a few very large values. Fraudulent transactions tend to show a different pattern, often including more extreme values, which supports the use of transformations like `log_TransactionAmt`.
 
 ![Transaction Distribution](images/transaction_distribution.png)
 
 **Observations:**
 - Fraud cases are much fewer than non-fraud  
-- Transaction amounts are not evenly distributed  
-- The dataset requires models that can handle imbalance  
+- Transaction amounts are highly skewed  
+- Fraud patterns suggest that both very small and very large transactions can be risky  
+- The dataset requires models that can handle imbalance and capture complex patterns  
 
 ---
 
 ## 6. Modeling Approach
 
+Several models were tested to evaluate their ability to detect fraudulent transactions.
+
 **Baseline Model:**
-- Logistic Regression  
+- Logistic Regression → simple and interpretable model used to establish a performance baseline  
 
 **Other Models:**
-- Decision Tree  
-- Random Forest  
-- XGBoost  
+- Decision Tree → captures non-linear patterns but can overfit  
+- Random Forest → ensemble method that improves stability and handles complex relationships  
+- XGBoost → gradient boosting model known for strong performance on tabular data and handling imbalance effectively  
 
 **Imbalance Handling:**
 - Random Oversampling  
 - SMOTE  
 - ADASYN  
 
-These were used to improve fraud detection for the minority class.
+These techniques were applied to improve detection of the minority fraud class.
+
+**Final Model Choice:**  
+XGBoost performed the best based on ROC-AUC and provided the strongest balance between precision and recall. It also works well with SHAP for model interpretation.
 
 ---
 
 ## 7. Model Training
 
-**Tools Used:**
-- scikit-learn  
-- xgboost  
-- imbalanced-learn  
-- shap  
-- joblib  
+## 7. Model Training
 
-**Process:**
-- Split data into training and testing sets  
-- Train models on training data  
-- Evaluate using test data  
-- Apply imbalance techniques to improve recall  
-- Compare models using multiple metrics  
+**Tools Used:**  
+- scikit-learn → Logistic Regression, Decision Tree, Random Forest, preprocessing, and evaluation metrics  
+- xgboost → XGBClassifier for gradient boosting  
+- imbalanced-learn → RandomOverSampler, SMOTE, ADASYN  
+- shap → TreeExplainer, summary plots, and waterfall plots for interpretation  
+- joblib → saving trained models  
+
+**Hyperparameters:**  
+Random Forest was trained using RandomForestClassifier with n_estimators=100, random_state=42, and n_jobs=-1 to allow parallel processing. XGBoost baseline was trained using XGBClassifier with n_estimators=200, max_depth=6, learning_rate=0.1, subsample=0.8, colsample_bytree=0.8, random_state=42, and eval_metric set to "logloss". For the final XGBoost model, class imbalance was handled by adjusting scale_pos_weight, calculated as the ratio of non-fraud to fraud cases in the training data.
+
+**Training Process:**  
+Tree-based models were trained on the full training dataset, while models requiring scaling were trained on a smaller subset for efficiency. Imbalance handling techniques such as Random Oversampling, SMOTE, and ADASYN were applied to improve fraud detection. The final XGBoost model was evaluated using stratified cross-validation to ensure consistent performance across folds. All models were compared using precision, recall, F1-score, and ROC-AUC.
 
 ---
 
 ## 8. Results
 
-**Metrics Used:**
-- Recall → detects fraud cases  
-- Precision → accuracy of fraud predictions  
-- F1-score → balance between precision and recall  
-- ROC-AUC → overall performance  
+**Metrics Used:**  
+Recall measures how many actual fraud cases are correctly detected, which is critical since missing fraud leads to direct financial loss. Precision measures how often a predicted fraud case is actually fraud, meaning low precision leads to too many false alarms. F1-score balances precision and recall into a single value. ROC-AUC measures how well the model separates fraud from non-fraud across all thresholds.
 
 **Best Model: XGBoost**
 
 ![Confusion Matrix](images/confusion_matrix_xgboost.png)
 
-**Results Summary:**
-- Very strong at identifying non-fraud cases  
-- Very few false positives  
-- Good detection of fraud cases  
+**Model Performance:**  
+XGBoost achieved the best overall performance, with a ROC-AUC around 0.93–0.94 and a strong balance between precision and recall. Random Forest also performed well but slightly below XGBoost. Logistic Regression had the weakest performance, mainly due to its inability to capture complex non-linear patterns in the data.
 
-**Model Comparison:**
-- Logistic Regression → lowest performance  
-- Decision Tree → moderate  
-- Random Forest → strong  
-- XGBoost → best  
+**Effect of Imbalance Handling:**  
+Applying techniques such as Random Oversampling, SMOTE, and ADASYN improved recall significantly by allowing the model to detect more fraud cases. However, this came at the cost of lower precision, meaning more false positives were introduced. Among all approaches, XGBoost without heavy oversampling provided the best balance between detecting fraud and avoiding excessive false alarms.
 
-**Imbalance Techniques:**
-- Improved recall  
-- Increased false positives  
-- XGBoost without heavy oversampling gave better balance  
+**Threshold Adjustment:**  
+The classification threshold can be adjusted to prioritize recall over precision. Lowering the threshold increases the number of detected fraud cases, which is important in real-world fraud detection where missing fraud is more costly than flagging legitimate transactions.
+
+**Key Takeaways:**
+- XGBoost achieved the highest overall performance  
+- Random Forest was a strong alternative  
+- Imbalance techniques improved recall but increased false positives  
+- There is a clear tradeoff between precision and recall depending on business needs  
 
 ---
+
+## 9. Model Interpretation
 
 ## 9. Model Interpretation
 
@@ -158,54 +196,64 @@ These were used to improve fraud detection for the minority class.
 
 ![Feature Importance](images/xgboost_feature_importance.png)
 
-Shows which features influenced the model the most.
+Feature importance highlights which variables have the greatest impact on the model’s predictions. The most influential features include transaction amount, time-related variables, and behavioral count features.
 
 **SHAP Summary:**
 
 ![SHAP Summary](images/shap_summary.png)
 
-Explains how features affect predictions.
+The SHAP summary plot provides a more detailed explanation of how each feature affects the model’s predictions. Features at the top have the strongest impact, and the color indicates whether high or low values increase the probability of fraud.
 
-**Insights:**
-- Transaction amount is a key factor  
-- Behavioral features help detect patterns  
-- Some features increase fraud probability, others reduce it  
+**Key Insights:**
+- `TransactionAmt` is one of the strongest indicators, where unusually high or low values increase fraud risk  
+- Time-related features such as `TransactionDT` capture behavioral patterns in transaction timing  
+- Behavioral features like `C1` and `C13` help identify suspicious activity patterns  
+- Address-related features such as `addr1` can signal mismatches in user behavior  
+- Certain features increase fraud probability, while others decrease it depending on their values  
 
----
+These interpretation techniques help explain how the model makes decisions and make the results more understandable for real-world use.
 
 ## 10. Key Insights
 
-- XGBoost handled complex patterns better than other models  
-- Class imbalance had a big impact on results  
-- Oversampling helped detect more fraud but added false positives  
-- Important features include transaction amount and behavior-related variables  
+- XGBoost performed the best because gradient boosting is effective at capturing complex patterns in tabular data, especially for fraud detection problems  
+- Adjusting the classification threshold had a major impact on performance. Lowering the threshold increased recall significantly, allowing the model to detect more fraud cases, while slightly reducing precision  
+- Feature engineering improved model performance. Features such as `log_TransactionAmt`, `email_domain_match`, and `missing_count` contributed meaningful signals in identifying fraud  
+- Imbalance handling techniques like SMOTE and ADASYN improved recall by helping the model learn from the minority class, although they also introduced more false positives  
 
 **Business Impact:**
 
-A model with higher recall can catch more fraudulent transactions, which helps reduce losses. Keeping precision reasonable helps avoid flagging too many normal transactions.
+A model with high recall can detect a large portion of fraudulent transactions, which directly reduces financial loss. For example, increasing recall from around 0.4 to above 0.8 means that significantly more fraud cases are caught. Even though this may increase false positives, the tradeoff is valuable in real-world applications where missing fraud is more costly. Additionally, using SHAP for interpretation makes the model more transparent and easier to trust in practical settings.
 
 ---
 
 ## 11. Conclusion
 
-This project built a full pipeline for fraud detection using machine learning. Multiple models were tested, and XGBoost performed the best.
+This project developed a complete fraud detection pipeline using the IEEE-CIS dataset. Starting from a large and highly imbalanced dataset, multiple models were trained and evaluated to identify the most effective approach.
 
-The results show that combining preprocessing, imbalance handling, and strong models can improve fraud detection performance.
+XGBoost achieved the best performance, showing a strong balance between precision and recall while maintaining a high ROC-AUC.
 
+**Key Contributions:**
+- Compared multiple machine learning models for fraud detection  
+- Evaluated different imbalance handling techniques  
+- Applied feature engineering to improve model performance  
+- Used SHAP to interpret model predictions and understand feature impact  
+
+This project shows how combining proper preprocessing, model selection, and interpretation techniques can lead to effective fraud detection in real-world scenarios.
 ---
 
 ## 12. Future Work
 
-- Tune model parameters  
-- Improve feature engineering  
-- Try additional models  
-- Deploy as an application or API  
-- Monitor performance over time  
+- Apply hyperparameter tuning (such as GridSearchCV or Optuna) to further improve model performance  
+- Improve feature engineering by creating additional domain-based features  
+- Ensure preprocessing is applied consistently using pipelines to avoid potential data leakage  
+- Evaluate all models on the same test set for more consistent comparison  
+- Deploy the model as a real-time application or API (Flask or FastAPI)  
+- Monitor model performance over time to detect changes in data patterns (concept drift)  
+- Explore cost-sensitive learning by adjusting thresholds based on the cost of false negatives vs false positives  
 
 ---
 
 ## 13. How to Run
-
 1. Clone the repository
 ```bash
 git clone https://github.com/isaammelo/Fraud-Detection-Capstone-Project.git
@@ -223,28 +271,25 @@ pip install -r requirements.txt
 ```bash
 jupyter notebook notebooks/Fraud_Detection_Capstone_Project_Code.ipynb
 ```
+Run all cells from top to bottom. The notebook performs preprocessing, EDA, model training, evaluation, and saves the final model.
 5. Load saved model if needed
 ```python
 import joblib
 model = joblib.load("models/xgb_fraud_model.pkl")
 ```
----
 
 ## 14. Repository Structure Explanation
-
 - `README.md` → full explanation of the project
 - `requirements.txt` → list of required Python libraries
 - `data/` → location for dataset files (not included)
-- `notebooks/` → main notebook with full pipeline
+- `notebooks/` → main notebook containing the full pipeline
 - `models/` → saved trained models
 - `results/` → evaluation results and outputs
 - `images/` → visualizations used in the README
 
----
-
 ## 15. Requirements
-
-To install all dependencies:
 ```bash
 pip install -r requirements.txt
+```
+```
 ```
